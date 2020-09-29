@@ -1,5 +1,7 @@
 #!/hint/bash
 # Maintainer: Oliver Weissbarth <mail@oweissbarth.de>
+# Contributor: bartus <arch-user-repository]a[bartus.33mail.com
+
 pkgname=djv
 pkgver=2.0.8
 pkgrel=2
@@ -9,14 +11,15 @@ url="http://djv.sourceforge.net/"
 license=('CUSTOM')
 groups=()
 depends=('ffmpeg' 'freetype2' 'glfw' 'glm' 'libjpeg' 'libpng' 'libtiff' 'opencolorio' 'openexr' 'python' 'rtaudio' 'zlib')
-makedepends=('cmake' 'alsa-lib' 'glew' 'libxcursor' 'libxinerama' 'libxrandr' 'nasm')
+makedepends=('cmake')
+checkdepends=('xorg-server-xvfb')
 replaces=()
 backup=()
 options=()
 source=("${pkgname}-${pkgver}.tgz::https://github.com/darbyjohnston/${pkgname^^}/archive/$pkgver.tar.gz"
 	"djv.desktop"
 	"djv.sh"
-	"CMakeLists.patch"
+	"disable_tests_and_examples.patch"
 	"drop-third-party.patch"
 	"rtaudio-hint.patch"
 	"ffmpeg-install.patch")
@@ -31,7 +34,7 @@ sha256sums=('bee18559d8a04b361376741900f21f69c637b51306d2b504b67f125dd14fd427'
 
 
 prepare() {
-	patch -b ${pkgname^^}-${pkgver}/CMakeLists.txt -i CMakeLists.patch
+	patch -b ${pkgname^^}-${pkgver}/CMakeLists.txt -i disable_tests_and_examples.patch
 	patch -b ${pkgname^^}-${pkgver}/third-party/CMakeLists.txt -i drop-third-party.patch
 	patch -b ${pkgname^^}-${pkgver}/cmake/Modules/FindRtAudio.cmake -i rtaudio-hint.patch
 	patch -b ${pkgname^^}-${pkgver}/cmake/Modules/FindFFmpeg.cmake -i ffmpeg-install.patch
@@ -67,8 +70,13 @@ build() {
 	cmake --build ${pkgname^^}-Release -j "${njobs}"
 	cmake --build ${pkgname^^}-Release -j "${njobs}" --target install
 	msg2 'Finish building DJV'
-
 }
+
+#check() {
+#	xvfb only provide sw opengl 3.3.2, where latest djv requires 4.1 :(
+#	xvfb-run --server-args "-screen 0 640x480x24" cmake --build ${pkgname^^}-${pkgver} --target test
+#	cat Testing/Temporary/LastTest.log
+#}
 
 package() {
 	install -D -m755 "$srcdir"/${pkgname^^}-install/bin/djv* -t "$pkgdir/opt/${pkgname}/bin/"
@@ -84,5 +92,4 @@ package() {
 	done
 	
 	install -D -m655 "${srcdir}/djv.sh" "${pkgdir}/usr/bin/djv"
-	
 }
