@@ -18,20 +18,23 @@ source=("${pkgname}-${pkgver}.tgz::https://github.com/darbyjohnston/${pkgname^^}
 	"djv.sh"
 	"CMakeLists.patch"
 	"drop-third-party.patch"
-	"rtaudio-hint.patch")
+	"rtaudio-hint.patch"
+	"ffmpeg-install.patch")
 noextract=()
 sha256sums=('bee18559d8a04b361376741900f21f69c637b51306d2b504b67f125dd14fd427'
             'ca440bc9c1713e9edb17ed5adc0456441e69af25f803c834427f23a6991e2eca'
             'e2bb0b7ebccd1e645d9a62f0c6dadafb94705766c787a2ea38b91b1da4e95cf7'
             'edd3888cc651edcd2cc5d03fcde44283f75de7aee04cc9f02eafdb108140dfdf'
             'f002c2586bed5c97f78a329379a85988c270751fc46cd6e9dd05103a52728618'
-            '50474a248f3259b6cf0a1439dc9fd4e34f211113e5f64116cb6df95bee8271f0')
+            '50474a248f3259b6cf0a1439dc9fd4e34f211113e5f64116cb6df95bee8271f0'
+            'e923d4abd6d2233ac6464773ff771ea7115cba8ed3fc2d1955b2129ff014272e')
 
 
 prepare() {
 	patch -b ${pkgname^^}-${pkgver}/CMakeLists.txt -i CMakeLists.patch
 	patch -b ${pkgname^^}-${pkgver}/third-party/CMakeLists.txt -i drop-third-party.patch
 	patch -b ${pkgname^^}-${pkgver}/cmake/Modules/FindRtAudio.cmake -i rtaudio-hint.patch
+	patch -b ${pkgname^^}-${pkgver}/cmake/Modules/FindFFmpeg.cmake -i ffmpeg-install.patch
 	
 	# Remove assert macro
 	sed -i '44,51d' ${pkgname^^}-${pkgver}/lib/djvCore/Core.h
